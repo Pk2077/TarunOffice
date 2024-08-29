@@ -1,0 +1,195 @@
+﻿@model volksoft.Models.Employee
+
+<style>
+    .form-control {
+        border-left: 2px solid red;
+        border-radius: 0;
+    }
+
+    .form-select {
+        border-left: 2px solid red;
+        border-radius: 0;
+    }
+</style>
+
+
+<div class="container form-group">
+    <div class="row " style="justify-content:flex-end;">
+        <div class="col-md-1 div_Save">
+            <button id="btn_Save" class="btn btn-primary btn_Save">Save</button>
+        </div>
+        <div class="col-md-1" id="btn_Update">
+            <button  class="btn btn-secondary btn_Save">Update</button>
+        </div>
+        <div class="col-md-1 btn_Delete">
+            <button id="btn_Delete" class="btn btn-danger">Delete</button>
+        </div>
+        <div class="col-md-1">
+            <button id="btn_Back" class="btn btn-secondary">Cancel</button>
+        </div>
+    </div>
+    <input id="txt_hnId" type="hidden" value="@Model.Id" />
+    <div class="row justify-content-center">
+        <div class="col-md-6 d-flex align-items-center">
+            <label for="txt_Id" class="form-label me-2" style="width: 100px;text-align:right;">Employee Id</label>
+            <input id="txt_Id" type="text" class="form-control" value="@(Model.Id.ToString() != "0" ? Model.Id.ToString() : "")" />
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-6 d-flex align-items-center">
+            <label class="form-label me-2" style="width: 100px;text-align:right;">Name</label>
+            <input id="txt_Name" type="text" class="form-control" value="@Model.Name" />
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-6 d-flex align-items-center">
+            <label class="form-label me-2" style="width: 100px;text-align:right;">Phone&nbsp;Number</label>
+            <input id="txt_PhoneNumber" type="text" class="form-control" value="@Model.PhoneNumber" />
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-6 d-flex align-items-center">
+            <label class="form-label me-2" style="width: 100px;text-align:right;">Email</label>
+            <input id="txt_Email" type="text" class="form-control" value="@Model.Email" />
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-6 d-flex align-items-center">
+            <label class="form-label me-2" style="width: 100px;text-align:right;">Address</label>
+            <input id="txt_Address" type="text" class="form-control" value="@Model.Address" />
+        </div>
+    </div>
+
+</div>
+
+<script>
+    $('.btn_Save').click(function () {
+
+        if ($('#txt_Name').val() == '') {
+            alert('Name is mandatory.');
+            return;
+        }
+        if ($('#txt_PhoneNumber').val() == '') {
+            alert('Phone Number is mandatory.');
+            return;
+        }
+        if ($('#txt_Email').val() == '') {
+            alert('Email is mandatory.');
+            return;
+        }
+        if ($('#txt_Address').val() == '') {
+            alert('Address is mandatory.');
+            return;
+        }
+
+        $.ajax({
+            url: '@Url.Action("SaveEmployee", "Employee")',
+            type: 'POST',
+            data: {
+                Id: $('#txt_hnId').val(),
+                Name: $('#txt_Name').val(),
+                PhoneNumber: $('#txt_PhoneNumber').val(),
+                Email: $('#txt_Email').val(),
+                Address: $('#txt_Address').val(),
+            },
+            success: function (response) {
+                if (response.status) {
+                    alert(response.Message);
+                    $('#txt_Name').val('');
+                    $('#txt_PhoneNumber').val('');
+                    $('#txt_Email').val('');
+                    $('#txt_Address').val('');
+
+                    $('#NewForm').hide();
+                    $('#EmpList').show();
+                    $('#btn_addEmployee').show();
+                    $('#btn_GotoSalary').show();
+                    $.ajax({
+                        url: '@Url.Action("GetEmployees", "Employee")',
+                        type: 'POST',
+                        data: {
+                        },
+                        success: function (response) {
+                            $('#EmpList').html(response);
+                        },
+                        error: function (xhr, status, error) {
+                            console.log(error);
+                        }
+                    });
+                }
+                else {
+                    alert(response.Message);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.log(error);
+            }
+        });
+    });
+    $('#btn_Back').click(function () {
+        $('#NewForm').hide();
+        $('#EmpList').show();
+        $('#btn_addEmployee').show();
+        $('#btn_GotoSalary').show();
+        $.ajax({
+            url: '@Url.Action("GetEmployees", "Employee")',
+            type: 'POST',
+            data: {
+            },
+            success: function (response) {
+                $('#EmpList').html(response);
+            },
+            error: function (xhr, status, error) {
+                console.log(error);
+            }
+        });
+    })
+    $(document).on('click', '#btn_Delete', function () {
+     $.confirm({
+         title: 'Confirm!',
+         content: 'Are you sure you want to delete ?',
+         buttons: {
+             Yes: function () {
+                 $.ajax({
+                     url: '@Url.Action("DeleteEmployee", "Employee")',
+                     type: 'POST',
+                     data: {
+                         id: $('#txt_hnId').val()
+                     },
+                     success: function (response) {
+                         if (response.status) {
+                             alert(response.Message);
+
+                             $('#NewForm').hide();
+                             $('#EmpList').show();
+                             $('#btn_addEmployee').show();
+                             $('#btn_GotoSalary').show();
+                             $.ajax({
+                                 url: '@Url.Action("GetEmployees", "Employee")',
+                                 type: 'POST',
+                                 data: {
+                                 },
+                                 success: function (response) {
+                                     $('#EmpList').html(response);
+                                 },
+                                 error: function (xhr, status, error) {
+                                     console.log(error);
+                                 }
+                             });
+                         } else {
+                             alert(response.Message);
+                         }
+                     },
+                     error: function (xhr, status, error) {
+                         console.log(error);
+                     }
+                 });
+             },
+             No: function () {
+                 //$.alert('Canceled!');
+             }
+         }
+     });
+ });
+</script>
+

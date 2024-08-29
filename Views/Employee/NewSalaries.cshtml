@@ -1,0 +1,236 @@
+﻿@using volksoft.Models
+@model SalaryModel
+
+<style>
+    .form-control {
+        border-left: 2px solid red;
+        border-radius: 0;
+    }
+
+    .form-select {
+        border-left: 2px solid red;
+        border-radius: 0;
+    }
+</style>
+
+
+<div class="container form-group">
+    <div class="row " style="justify-content:flex-end;">
+        <div class="col-md-1 div_saSave">
+            <button id="btn_saSave" class="btn btn-primary btn_saSave">Save</button>
+        </div>
+        <div class="col-md-1" id="btn_saUpdate">
+            <button class="btn btn-secondary btn_saSave">Update</button>
+        </div>
+        <div class="col-md-1 btn_saDelete">
+            <button id="btn_saDelete" class="btn btn-danger">Delete</button>
+        </div>
+        <div class="col-md-1">
+            <button id="btn_saBack" class="btn btn-secondary">Cancel</button>
+        </div>
+    </div>
+    <input id="txt_hnsaId" type="hidden" value="@Model.Id" />
+    <div class="row justify-content-center">
+        <div class="col-md-6 d-flex align-items-center">
+            <label class="form-label me-2" style="width: 100px;text-align:right;">Employee Id</label>
+            <select @(Model.EmployeeId > 0 ? "disabled" : "") id="txt_saEmployeeId" class="form-select">
+                @{
+                    var empList = (List<Employee>)ViewBag.EmpList;
+                }
+                <option value="0"></option>
+                @foreach (var item in empList)
+                {
+                    <option @(Model.EmployeeId == item.Id ? "selected" :"") value="@item.Id">@item.Name - @item.Id</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-6 d-flex align-items-center">
+            <label for="txt_saId" class="form-label me-2" style="width: 100px;text-align:right;">Salary Id</label>
+            <input id="txt_saId" readonly type="text" class="form-control" value="@(Model.Id.ToString() != "0" ? Model.Id.ToString() : "")" />
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-6 d-flex align-items-center">
+            <label class="form-label me-2" style="width: 100px;text-align:right;">Salary</label>
+            <input id="txt_Salary" type="text" onkeydown="return decimalNum(event)" class="form-control" value="@Model.Salary.ToString("0.00")" />
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-6 d-flex align-items-center">
+            <label class="form-label me-2" style="width: 100px;text-align:right;">Salary Date</label>
+            <input id="txt_SalaryDate" autocomplete='off' type="text" class="form-control" value="@Model.SalaryDate.ToString("dd/MM/yyyy")" />
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-6 d-flex align-items-center">
+            <label class="form-label me-2" style="width: 100px;text-align:right;">LOP</label>
+            <input id="txt_LOP" type="text" onkeydown="return decimalNum(event)" class="form-control" value="@Model.LOP.ToString("0.00")" />
+        </div>
+    </div>
+
+</div>
+
+<script>
+    $('.btn_saSave').click(function () {
+        var test = $('#txt_saEmployeeId').val();
+        if ($('#txt_saEmployeeId').val() == '' || $('#txt_saEmployeeId').val() == '0') {
+            alert('Employee selection is mandatory.');
+            return;
+        }
+        var txt_Salary = $('#txt_Salary').val();
+        if (txt_Salary == '') {
+            alert('Salary is mandatory.');
+            return;
+        }
+        if ($('#txt_SalaryDate').val() == '') {
+            alert('SalaryDate selection is mandatory.');
+            return;
+        }
+        var txt_LOP = $('#txt_LOP').val();
+        if (txt_LOP == '') {
+            txt_LOP = '0';
+        }
+
+        $.ajax({
+            url: '@Url.Action("SaveSalaries", "Employee")',
+            type: 'POST',
+            data: {
+                Id: $('#txt_hnsaId').val(),
+                EmployeeId: $('#txt_saEmployeeId').val(),
+                Salary: $('#txt_Salary').val(),
+                SalaryDate: $('#txt_SalaryDate').val(),
+                LOP: txt_LOP,
+            },
+            success: function (response) {
+                if (response.status) {
+                    alert(response.Message);
+                    $('#txt_saEmployeeId').val('');
+                    $('#txt_Salary').val('');
+                    $('#txt_SalaryDate').val('');
+                    $('#txt_LOP').val('');
+
+                    $('#SalaryForm').hide();
+                    $('#SalaryList').show();
+                    $('#btn_addSalary').show();
+                    $('#btn_GotoEmployees').show();
+                    $.ajax({
+                        url: '@Url.Action("GetSalaries", "Employee")',
+                        type: 'POST',
+                        data: {
+                        },
+                        success: function (response) {
+                            $('#SalaryList').html(response);
+                        },
+                        error: function (xhr, status, error) {
+                            console.log(error);
+                        }
+                    });
+                }
+                else {
+                    alert(response.Message);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.log(error);
+            }
+        });
+    });
+    $('#btn_saBack').click(function () {
+        $('#SalaryForm').hide();
+        $('#SalaryList').show();
+        $('#btn_addSalary').show();
+        $('#btn_GotoEmployees').show();
+        $.ajax({
+            url: '@Url.Action("GetSalaries", "Employee")',
+            type: 'POST',
+            data: {
+            },
+            success: function (response) {
+                $('#SalaryList').html(response);
+            },
+            error: function (xhr, status, error) {
+                console.log(error);
+            }
+        });
+    })
+    $(document).on('click', '#btn_saDelete', function () {
+     $.confirm({
+         title: 'Confirm!',
+         content: 'Are you sure you want to delete ?',
+         buttons: {
+             Yes: function () {
+                 $.ajax({
+                     url: '@Url.Action("DeleteSalaries", "Employee")',
+                     type: 'POST',
+                     data: {
+                         id: $('#txt_hnsaId').val()
+                     },
+                     success: function (response) {
+                         if (response.status) {
+                             alert(response.Message);
+
+                             $('#SalaryForm').hide();
+                             $('#SalaryList').show();
+                             $('#btn_addSalary').show();
+                             $('#btn_GotoEmployees').show();
+                             $.ajax({
+                                 url: '@Url.Action("GetSalaries", "Employee")',
+                                 type: 'POST',
+                                 data: {
+                                 },
+                                 success: function (response) {
+                                     $('#SalaryList').html(response);
+                                 },
+                                 error: function (xhr, status, error) {
+                                     console.log(error);
+                                 }
+                             });
+                         } else {
+                             alert(response.Message);
+                         }
+                     },
+                     error: function (xhr, status, error) {
+                         console.log(error);
+                     }
+                 });
+             },
+             No: function () {
+                 //$.alert('Canceled!');
+             }
+         }
+     });
+    });
+    function decimalNum(evt) {
+        var charCode = (evt.which) ? evt.which : event.keyCode;
+        if (charCode != 46 && charCode > 31 && (charCode < 48 || charCode > 57)) {
+            return false;
+        } else {
+            if (evt.target.value.search(/\./) > -1 && charCode == 46) {
+                return false;
+            }
+            return true;
+        }
+    }
+    function testDate(str) {
+        var t = str.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        if (t === null)
+            return false;
+        var d = +t[1], m = +t[2], y = +t[3];
+        if (m >= 1 && m <= 12 && d >= 1 && d <= 31) {
+            return true;
+        }
+        return false;
+    }
+    $("#txt_SalaryDate").datepicker({
+        showAnim: 'slideDown',
+        changeMonth: true,
+        changeYear: true,
+        showWeek: true,
+        firstDay: 1,
+        dateFormat: 'dd/mm/yy'
+    });
+</script>
+
+

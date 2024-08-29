@@ -1,0 +1,170 @@
+﻿@using volksoft.Models
+@model List<Employee>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+<link href="~/Content/jquery-confirm.css" rel="stylesheet" />
+<script src="~/Scripts/jquery-confirm.js"></script>
+<script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css">
+
+<div id="div_EmpList" style="margin-bottom:20px;text-align:right;">
+    <button id="btn_addEmployee" class="btn btn-outline-secondary">Add Employee</button>
+    <button id="btn_GotoSalary" class="btn btn-outline-secondary">Add Salaries</button>
+</div>
+<div id="div_SalaryList" style="margin-bottom:20px;text-align:right;display:none;">
+    <button id="btn_addSalary" class="btn btn-outline-secondary">Add New</button>
+    <button id="btn_GotoEmployees" class="btn btn-outline-secondary">Cancel</button>
+</div>
+
+<div id="EmpList">
+    @Html.Partial("~/Views/Employee/List.cshtml", Model)
+</div>
+<div id="SalaryList" style="display:none;">
+    @{
+        var salaryList = (List<SalaryModel>)ViewBag.SalaryList;
+    }
+    @Html.Partial("~/Views/Employee/SalaryList.cshtml", salaryList)
+</div>
+
+
+<div id="NewForm" style="line-height: 45px;display:none;"></div>
+<div id="SalaryForm" style="line-height: 45px;display:none;"></div>
+
+<script>
+    $('#btn_addEmployee').click(function () {
+        $.ajax({
+            url: '@Url.Action("NewEmployee", "Employee")',
+            type: 'POST',
+            data: {},
+            success: function (response) {
+                $('#NewForm').html(response);
+
+                $('#EmpList').hide();
+                $('#btn_addEmployee').hide();
+                $('#btn_GotoSalary').hide();
+                $('#btn_Update').hide();
+                $('.btn_Delete').hide();
+                $('#NewForm').show();
+                $('.div_Save').show();
+            },
+            error: function (xhr, status, error) {
+                console.log(error);
+            }
+        });
+    });
+
+    $(document).on('click','.btn_editEmployee',function () {
+        var SelectedEmp = $(this);
+        var id = SelectedEmp.closest('tr').find('.clEmpId').val();
+        $.ajax({
+            url: '@Url.Action("EditEmployee", "Employee")',
+            type: 'POST',
+            data: {
+                id: id
+            },
+            success: function (response) {
+                $('#NewForm').html(response);
+
+                $('#EmpList').hide();
+                $('#btn_addEmployee').hide();
+                $('#btn_GotoSalary').hide();
+                $('.div_Save').hide();
+                $('#NewForm').show();
+                $('#btn_Update').show();
+                $('.btn_Delete').show();
+
+            },
+            error: function (xhr, status, error) {
+                console.log(error);
+            }
+        });
+    });
+
+    $('#btn_GotoSalary').click(function () {
+        $.ajax({
+            url: '@Url.Action("GetSalaries", "Employee")',
+            type: 'POST',
+            success: function (response) {
+                $('#SalaryList').html(response);
+
+                $('#SalaryList').show();
+                $('#EmpList').hide();
+                $('#div_EmpList').hide();
+                $('#div_SalaryList').show();
+            },
+            error: function (xhr, status, error) {
+                console.log(error);
+            }
+        });
+    });
+
+    $('#btn_addSalary').click(function () {
+        $.ajax({
+            url: '@Url.Action("NewSalaries", "Employee")',
+            type: 'POST',
+            data: {},
+            success: function (response) {
+                $('#SalaryForm').html(response);
+
+                $('#SalaryList').hide();
+                $('#btn_addSalary').hide();
+                $('#btn_GotoEmployees').hide();
+                $('#btn_saUpdate').hide();
+                $('.btn_saDelete').hide();
+                $('#SalaryForm').show();
+                $('.div_saSave').show();
+            },
+            error: function (xhr, status, error) {
+                console.log(error);
+            }
+        });
+    });
+    $(document).on('click', '.btn_editsalary', function () {
+        var SelectedEmp = $(this);
+        var id = SelectedEmp.closest('tr').find('.clsalaryId').val();
+        $.ajax({
+            url: '@Url.Action("EditSalaries", "Employee")',
+            type: 'POST',
+            data: {
+                id: id
+            },
+            success: function (response) {
+                $('#SalaryForm').html(response);
+
+                $('#SalaryList').hide();
+                $('#btn_addSalary').hide();
+                $('#btn_GotoEmployees').hide();
+                $('.div_saSave').hide();
+                $('.btn_saDelete').hide();
+                $('#SalaryForm').show();
+                $('#btn_saUpdate').show();
+                $('.btn_saDelete').show();
+            },
+            error: function (xhr, status, error) {
+                console.log(error);
+            }
+        });
+    });
+
+    $("#btn_export").click(function () {
+        $.confirm({
+            title: 'Confirm!',
+            content: 'Do you want to export report to the Excel?',
+            buttons: {
+                Yes: function () {
+                    var strURL = '@Url.Action("ExportExcel", "Employee")';
+                    var win = window.open(strURL, '_self');
+                },
+                No: function () {
+                }
+            }
+        })
+    });
+    $('#btn_GotoEmployees').click(function () {
+        $('#SalaryList').hide();
+        $('#div_SalaryList').hide();
+        $('#EmpList').show();
+        $('#div_EmpList').show();
+    });
+</script>

@@ -1,0 +1,57 @@
+﻿@model List<volksoft.Models.SalaryModel>
+
+<style>
+    #tbl_salary thead th {
+        background-color: #4f81bd;
+        color: #fff;
+        max-height: 25px !important;
+        padding-top: 0px;
+        padding-right: 0px;
+        padding-bottom: 0px;
+    }
+
+    #tbl_salary tbody td {
+        background-color: #b8cce4;
+        color: #000;
+        max-height: 25px !important;
+        padding-top: 0px;
+        padding-right: 0px;
+        padding-bottom: 0px;
+    }
+</style>
+
+<table id="tbl_salary" class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Salary Id</th>
+            <th>salaryloyee Id</th>
+            <th>Salary Date</th>
+            <th>Salary</th>
+            <th>LOP</th>
+            <th>Credited Salary</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var salary in Model)
+        {
+            <tr class="btn_editsalary">
+                <td>@salary.Id<input class="clsalaryId" type="hidden" value="@salary.Id" /></td>
+                <td>@salary.EmployeeId</td>
+                <td>@salary.SalaryDate.ToString("dd-MM-yyyy")</td>
+                <td>@salary.Salary.ToString("0.00")</td>
+                <td>@salary.LOP</td>
+                <td>@(salary.Salary - salary.LOP)</td>
+            </tr>
+        }
+        @*<tr>
+                <td></td>
+                <td></td>
+                <td>Total</td>
+                <td></td>
+                <td>@Model.Select(x => x.Salary).ToList().Sum()</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>*@
+    </tbody>
+</table>

@@ -1,0 +1,55 @@
+﻿@model List<volksoft.Models.Employee>
+
+<style>
+    #tbl_emp thead th {
+        background-color: #4f81bd;
+        color: #fff;
+        max-height: 25px;
+        padding-top: 0px;
+        padding-right: 0px;
+        padding-bottom: 0px;
+    }
+
+    #tbl_emp tbody td {
+        background-color: #b8cce4;
+        color: #000;
+        max-height: 25px;
+        padding-top: 0px;
+        padding-right: 0px;
+        padding-bottom: 0px;
+    }
+</style>
+
+<table id="tbl_emp" class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Employee Id</th>
+            <th>Name</th>
+            <th>PhoneNumber</th>
+            <th>Email</th>
+            <th>Address</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var emp in Model)
+        {
+            <tr class="btn_editEmployee">
+                <td>@emp.Id<input class="clEmpId" type="hidden" value="@emp.Id" /></td>
+                <td>@emp.Name</td>
+                <td>@emp.PhoneNumber</td>
+                <td>@emp.Email</td>
+                <td>@emp.Address</td>
+            </tr>
+        }
+        @*<tr>
+            <td></td>
+            <td></td>
+            <td>Total</td>
+            <td></td>
+            <td>@Model.Select(x => x.Salary).ToList().Sum()</td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>*@
+    </tbody>
+</table>
