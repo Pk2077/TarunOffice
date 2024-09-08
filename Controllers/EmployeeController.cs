@@ -1,4 +1,5 @@
 ﻿using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Wordprocessing;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -17,16 +18,27 @@ namespace volksoft.Controllers
         {
             Employee _Employee = new Employee();
             ViewBag.SalaryList = new List<SalaryModel>();
+
             List<Employee> list = _Employee.GetEmployees();
-            Session["Employees"] = list;
-            return View(list);
+            var employees = list.OrderBy(e => e.Id).ToList();
+            var paginatedEmployees = employees.Take(10).ToList();
+
+            ViewBag.CurrentPage = 1;
+            ViewBag.TotalPages = (int)Math.Ceiling(employees.Count() / (double)10);
+            Session["Employees"] = paginatedEmployees;
+            return View(paginatedEmployees);
         }
         public ActionResult GetEmployees()
         {
             Employee _Employee = new Employee();
             List<Employee> list = _Employee.GetEmployees();
-            Session["Employees"] = list;
-            return PartialView("List", list);
+            var employees = list.OrderBy(e => e.Id).ToList();
+            var paginatedEmployees = employees.Take(10).ToList();
+
+            ViewBag.CurrentPage = 1;
+            ViewBag.TotalPages = (int)Math.Ceiling(employees.Count() / (double)10);
+            //Session["Employees"] = list;
+            return PartialView("List", paginatedEmployees);
         }
         public ActionResult NewEmployee()
         {
@@ -85,8 +97,13 @@ namespace volksoft.Controllers
         {
             SalaryModel _SalaryModel = new SalaryModel();
             List<SalaryModel> list = _SalaryModel.GetSalaries();
+            var employees = list.OrderBy(e => e.Id).ToList();
+            var paginatedEmployees = employees.Take(10).ToList();
+
+            ViewBag.CurrentPage = 1;
+            ViewBag.TotalPages = (int)Math.Ceiling(employees.Count() / (double)10);
             Session["Salaries"] = list;
-            return PartialView("SalaryList", list);
+            return PartialView("SalaryList", paginatedEmployees);
         }
         public ActionResult NewSalaries()
         {
@@ -146,6 +163,43 @@ namespace volksoft.Controllers
                 return Json(new { status = false, Message = "Failed to delete : " + ex.Message });
             }
         }
+        public ActionResult Pagination(int? page)
+        {
+            int pageSize = 10; // Number of records per page
+            int pageNumber = (page ?? 1); // If no page is provided, default to page 1
+
+            Employee _Employee = new Employee();
+            List<Employee> list = _Employee.GetEmployees();
+            // Get the list of employees (you can replace this with your data source)
+            var employees = list.OrderBy(e => e.Id).ToList();
+
+            // Use LINQ to skip and take records for pagination
+            var paginatedEmployees = employees.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+
+            ViewBag.CurrentPage = pageNumber;
+            ViewBag.TotalPages = (int)Math.Ceiling(employees.Count() / (double)pageSize);
+
+            return PartialView("List", paginatedEmployees);
+        }
+        public ActionResult SalaryPagination(int? page)
+        {
+            int pageSize = 10; // Number of records per page
+            int pageNumber = (page ?? 1); // If no page is provided, default to page 1
+
+            SalaryModel _SalaryModel = new SalaryModel();
+            List<SalaryModel> list = _SalaryModel.GetSalaries();
+            // Get the list of employees (you can replace this with your data source)
+            var salarylst = list.OrderBy(e => e.Id).ToList();
+
+            // Use LINQ to skip and take records for pagination
+            var paginatedEmployees = salarylst.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+
+            ViewBag.CurrentPage = pageNumber;
+            ViewBag.TotalPages = (int)Math.Ceiling(salarylst.Count() / (double)pageSize);
+
+            return PartialView("SalaryList", paginatedEmployees);
+        }
+
         public void ExportExcel()
         {
             List<Employee> Employeelst = new List<Employee>();
